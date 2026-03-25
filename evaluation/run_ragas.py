@@ -12,6 +12,8 @@ from backend.app.agents.router import route_query
 from backend.app.core.session import session_store
 from backend.app.ingestion.index import upsert_documents
 from backend.app.ingestion.loaders import load_any
+from backend.app.services.embeddings import get_embeddings
+from backend.app.services.llm import get_chat_model
 from backend.app.services.tabular_store import TabularAsset, tabular_store
 
 
@@ -100,7 +102,13 @@ async def main() -> None:
     except Exception:
         pass
 
-    results = evaluate(ds, metrics=metrics)
+    # Use the same configured provider as the app, so evaluation matches deployment.
+    results = evaluate(
+        ds,
+        metrics=metrics,
+        llm=get_chat_model(temperature=0.0),
+        embeddings=get_embeddings(),
+    )
     df = results.to_pandas()
     df.insert(0, "id", [r["id"] for r in records])
     df.insert(1, "difficulty", [r["difficulty"] for r in records])

@@ -5,7 +5,7 @@ Frontend: **React (Vite)**
 Core features: **multi-agent RAG**, **hybrid retrieval**, **file upload (PDF/CSV/XLSX)**, **source citations**, **conversation sessions**, **RAGAS evaluation**, **Docker**
 
 ## Live demo
-- **App URL**: _TODO: add deployed URL_
+- **App URL**: `https://project-assistant-lk5w.onrender.com`
 - **Screen recording (3–5 min)**: _TODO: add link_
 
 ## Quickstart (local dev)
@@ -31,7 +31,10 @@ This creates realistic-but-synthetic messy documents in `sample_data/`:
 
 ```bash
 set APP_ENV=dev
-set LLM_PROVIDER=ollama
+set LLM_PROVIDER=gemini
+set GEMINI_API_KEY=YOUR_KEY
+set GEMINI_MODEL=gemini-2.5-flash
+set GEMINI_EMBED_MODEL=gemini-embedding-001
 python -m uvicorn backend.app.main:app --reload --port 8000
 ```
 
@@ -123,16 +126,21 @@ This repo is set up so **one container** serves:
    - `CORS_ORIGINS=https://project-assistant-lk5w.onrender.com`
    - `LLM_PROVIDER=gemini`
    - `GEMINI_API_KEY=<>`
-   - `GEMINI_MODEL=gemini-2.5-flash` (pick from https://ai.google.dev/gemini-api/docs/models)
+   - `GEMINI_MODEL=gemini-2.5-flash`
    - `GEMINI_EMBED_MODEL=gemini-embedding-001`
-   - `STORAGE_DIR=/tmp/storage` (Render Free has no persistent disk; this avoids permission issues)
+   - `STORAGE_DIR=/tmp/storage`
 6. Deploy. When it’s live:
-   - UI: `https://<your-render-service>.onrender.com/`
-   - API health: `https://<your-render-service>.onrender.com/api/health`
+   - UI: `https://project-assistant-lk5w.onrender.com/`
+   - API health: `https://project-assistant-lk5w.onrender.com/api/health`
 
 ### Notes
 - For hosted deployments, **use `LLM_PROVIDER=gemini` or `LLM_PROVIDER=openai_compat`** (Ollama typically isn’t available on free-tier web runtimes).
 - The backend stores Chroma + uploads under `backend/storage`. Without a persistent disk, this data is **ephemeral**.
+
+## Troubleshooting
+- **Upload works locally but fails on Render**: set `STORAGE_DIR=/tmp/storage` (Render Free has no persistent disk).
+- **Gemini 404 NOT_FOUND**: use a model name from Google’s list, e.g. `GEMINI_MODEL=gemini-2.5-flash`. See `https://ai.google.dev/gemini-api/docs/models`.
+- **Embeddings 404 NOT_FOUND**: set `GEMINI_EMBED_MODEL=gemini-embedding-001`. See `https://ai.google.dev/gemini-api/docs/embeddings`.
 
 ## Required docs
 - `ARCHITECTURE.md`: system design, pipeline, agent orchestration, scale/security notes
