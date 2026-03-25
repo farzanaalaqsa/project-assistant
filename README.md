@@ -66,12 +66,16 @@ Copy `backend/.env.example` to `backend/.env` and adjust as needed.
 - **Ollama (local)**:
   - `LLM_PROVIDER=ollama`
   - `OLLAMA_MODEL=llama3.1`
+- **Gemini (Google AI Studio)**:
+  - `LLM_PROVIDER=gemini`
+  - set `GEMINI_API_KEY`, `GEMINI_MODEL`
 - **OpenAI-compatible (Groq/OpenRouter/etc)**:
   - `LLM_PROVIDER=openai_compat`
   - set `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
 
 ### Embeddings
-- If `OPENAI_API_KEY` is set, the backend will use lightweight hosted embeddings (`text-embedding-3-small`).
+- If `GEMINI_API_KEY` is set, the backend will use Gemini embeddings (`text-embedding-004`).
+- Else if `OPENAI_API_KEY` is set, the backend will use lightweight hosted embeddings (`text-embedding-3-small`).
 - Otherwise, install local embeddings with:
 
 ```bash
@@ -116,17 +120,16 @@ This repo is set up so **one container** serves:
 5. Add these **Environment Variables** (Render “Environment” tab):
    - `APP_ENV=prod`
    - `LOG_LEVEL=INFO`
-   - `CORS_ORIGINS=https://<your-render-service>.onrender.com`
-   - `LLM_PROVIDER=openai_compat`
-   - `OPENAI_API_KEY=<your key>`
-   - `OPENAI_BASE_URL=<provider base url>` (keep default for OpenAI; change for Groq/OpenRouter/etc)
-   - `OPENAI_MODEL=<your model>` (e.g. `gpt-4o-mini`)
+   - `CORS_ORIGINS=https://project-assistant-lk5w.onrender.com`
+   - `LLM_PROVIDER=gemini`
+   - `GEMINI_API_KEY=AIzaSyDvzzEYgZhbtsYJMlKPdeqlLyIhIg80d7o`
+   - `GEMINI_MODEL=gemini-1.5-flash` (or your preferred model)
 6. Deploy. When it’s live:
    - UI: `https://<your-render-service>.onrender.com/`
    - API health: `https://<your-render-service>.onrender.com/api/health`
 
 ### Notes
-- For hosted deployments, **use `LLM_PROVIDER=openai_compat`** (Ollama typically isn’t available on free-tier web runtimes).
+- For hosted deployments, **use `LLM_PROVIDER=gemini` or `LLM_PROVIDER=openai_compat`** (Ollama typically isn’t available on free-tier web runtimes).
 - The backend stores Chroma + uploads under `backend/storage`. Without a persistent disk, this data is **ephemeral**.
 
 ## Required docs

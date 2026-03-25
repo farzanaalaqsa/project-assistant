@@ -9,6 +9,16 @@ from backend.app.core.config import settings
 
 def get_chat_model(temperature: float = 0.2) -> BaseChatModel:
     provider = settings.llm_provider.lower().strip()
+    if provider == "gemini":
+        if not settings.gemini_api_key:
+            raise RuntimeError("GEMINI_API_KEY is required for LLM_PROVIDER=gemini")
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        return ChatGoogleGenerativeAI(
+            model=settings.gemini_model,
+            google_api_key=settings.gemini_api_key,
+            temperature=temperature,
+        )
     if provider == "openai_compat":
         if not settings.openai_api_key:
             raise RuntimeError("OPENAI_API_KEY is required for LLM_PROVIDER=openai_compat")

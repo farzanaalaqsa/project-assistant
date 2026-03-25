@@ -10,13 +10,17 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     cors_origins: str = "http://localhost:5173"
 
-    llm_provider: str = "ollama"  # ollama | openai_compat
+    llm_provider: str = "ollama"  # ollama | openai_compat | gemini
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.1"
 
     openai_api_key: str | None = None
     openai_base_url: str = "https://api.openai.com/v1"
     openai_model: str = "gpt-4o-mini"
+
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-1.5-flash"
+    gemini_embed_model: str = "text-embedding-004"
 
     top_k: int = 6
     enable_rerank: bool = False
