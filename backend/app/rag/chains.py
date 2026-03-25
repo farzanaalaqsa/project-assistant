@@ -5,7 +5,8 @@ from typing import Any
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 
-from backend.app.services.llm import get_chat_model, extract_usage
+from backend.app.core.config import settings
+from backend.app.services.llm import extract_usage, get_chat_model
 
 
 DOC_QA_PROMPT = ChatPromptTemplate.from_messages(
@@ -60,8 +61,11 @@ async def answer_with_context(question: str, *, history: str, docs: list[Documen
         excerpts = []
         for doc, sid in zip(docs, source_ids, strict=False):
             excerpts.append(f"- [{sid}] {excerpt_for(doc)}")
+        provider = getattr(settings, "llm_provider", "unknown")
         fallback = (
-            "LLM is unavailable (check `LLM_PROVIDER` and credentials / local model). "
+            f"LLM is unavailable (provider: `{provider}`). "
+            f"Last error: {type(e).__name__}: {e}\n\n"
+            "Fix: on Render set `LLM_PROVIDER=gemini` and `GEMINI_API_KEY`, or use `LLM_PROVIDER=openai_compat`.\n\n"
             "I can’t generate a full answer, but here are the most relevant excerpts with citations:\n\n"
             + "\n".join(excerpts[:8])
         )
