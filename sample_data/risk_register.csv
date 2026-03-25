@@ -1,0 +1,6 @@
+Risk ID,Description,Likelihood,Impact,Status,Owner,Mitigation
+R-03,Monsoon rainfall reduces productivity,High,Medium,Open,Planning,Float reallocation; weather windows
+R-07,Utility relocation permits delayed by CityWorks,High,High,Open,Utilities,Escalate; fast-track request; weekend works
+R-12,Steel price volatility / supplier lead time,Medium,High,Open,QS,Lock-in PO; alternate suppliers
+R-15,Telecom duct relocation scope unclear (missing drawings),Medium,Medium,Open,,Provisional sums; request drawings
+R-02,Safety incident during night works,Low,High,Mitigating,HSE,Permit-to-work; lighting; supervision
