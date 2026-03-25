@@ -16,7 +16,9 @@ export async function uploadFiles({ files, sessionId }) {
     let text = await res.text()
     try {
       const data = JSON.parse(text)
-      throw new Error(data.detail || text)
+      throw new Error(
+        (data.detail || text) + (data.trace_id ? ` (trace_id: ${data.trace_id})` : '')
+      )
     } catch {
       throw new Error(text || `upload failed: ${res.status}`)
     }
@@ -34,7 +36,9 @@ export async function chat({ message, sessionId }) {
     let text = await res.text()
     try {
       const data = JSON.parse(text)
-      throw new Error(data.detail || text)
+      throw new Error(
+        (data.detail || text) + (data.trace_id ? ` (trace_id: ${data.trace_id})` : '')
+      )
     } catch {
       throw new Error(text || `chat failed: ${res.status}`)
     }

@@ -161,7 +161,8 @@ def create_app() -> FastAPI:
                     detail=(
                         f"Upload failed while processing `{f.filename}`. "
                         f"Common fixes: set `GEMINI_API_KEY` (for embeddings + LLM), or set "
-                        f"`STORAGE_DIR=/tmp/storage` on Render Free. Error: {type(e).__name__}: {e}"
+                        f"`STORAGE_DIR=/tmp/storage` on Render Free, or set `GEMINI_EMBED_MODEL=gemini-embedding-001`. "
+                        f"Error: {type(e).__name__}: {e}"
                     ),
                 ) from e
 

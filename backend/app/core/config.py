@@ -20,7 +20,9 @@ class Settings(BaseSettings):
 
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-1.5-flash"
-    gemini_embed_model: str = "models/embedding-001"
+    # Gemini API embeddings (embedContent) expect e.g. `gemini-embedding-001`
+    # See: https://ai.google.dev/gemini-api/docs/embeddings
+    gemini_embed_model: str = "gemini-embedding-001"
 
     top_k: int = 6
     enable_rerank: bool = False
