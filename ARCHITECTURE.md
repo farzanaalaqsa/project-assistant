@@ -9,30 +9,30 @@ This system ingests **messy project documents (PDF)** and **tabular data (CSV/Ex
 
 ```mermaid
 flowchart LR
-  U[User (React UI)] -->|Upload PDF/CSV/XLSX| API[FastAPI Backend]
+  U["User (React UI)"] -->|Upload PDFs, CSV, XLSX| API["FastAPI Backend"]
   U -->|Chat question + session_id| API
 
   subgraph Ingestion
-    API --> LDR[Loaders: PyPDF / pandas]
-    LDR --> SPLIT[Chunking: RecursiveCharacterTextSplitter]
-    SPLIT --> EMB[Embeddings: Gemini or OpenAI (fallback local)]
-    EMB --> VDB[(Chroma Vector DB)]
-    SPLIT --> BM25[(In-memory BM25 index per session)]
-    LDR --> TAB[(In-memory TabularStore per session)]
+    API --> LDR["Loaders: PyPDF + pandas"]
+    LDR --> SPLIT["Chunking: RecursiveCharacterTextSplitter"]
+    SPLIT --> EMB["Embeddings: Gemini or OpenAI (fallback local)"]
+    EMB --> VDB[("Chroma Vector DB")]
+    SPLIT --> BM25[("In-memory BM25 per session")]
+    LDR --> TAB[("In-memory TabularStore per session")]
   end
 
   subgraph Orchestration
-    API --> ROUTER[Router Agent]
-    ROUTER --> DOC[Document Q&A Agent]
-    ROUTER --> DATA[Data Analysis Agent]
-    DOC --> RET[Hybrid Retrieval: BM25 + Vector + de-dupe]
+    API --> ROUTER["Router Agent"]
+    ROUTER --> DOC["Document Q&A Agent"]
+    ROUTER --> DATA["Data Analysis Agent"]
+    DOC --> RET["Hybrid Retrieval: BM25 + vector + de-dupe"]
     DATA --> RET
-    RET --> LLM[LLM (Gemini / OpenAI-compatible / Ollama)]
+    RET --> LLM["LLM: Gemini | OpenAI compat | Ollama"]
     DOC -->|Answer + citations| API
     DATA -->|Answer + citations| API
   end
 
-  API --> OBS[Structured JSON Logs (x-trace-id)]
+  API --> OBS["Structured JSON Logs (x-trace-id)"]
 ```
 
 ## Technology selection (and trade-offs)
