@@ -14,8 +14,12 @@ def get_chat_model(temperature: float = 0.2) -> BaseChatModel:
             raise RuntimeError("GEMINI_API_KEY is required for LLM_PROVIDER=gemini")
         from langchain_google_genai import ChatGoogleGenerativeAI
 
+        model = (settings.gemini_model or "").strip()
+        if model.startswith("models/"):
+            model = model.removeprefix("models/").strip()
+
         return ChatGoogleGenerativeAI(
-            model=settings.gemini_model,
+            model=model,
             google_api_key=settings.gemini_api_key,
             temperature=temperature,
         )

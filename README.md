@@ -123,7 +123,7 @@ This repo is set up so **one container** serves:
    - `CORS_ORIGINS=https://project-assistant-lk5w.onrender.com`
    - `LLM_PROVIDER=gemini`
    - `GEMINI_API_KEY=<>`
-   - `GEMINI_MODEL=gemini-1.5-flash` (or your preferred model)
+   - `GEMINI_MODEL=gemini-2.5-flash` (pick from https://ai.google.dev/gemini-api/docs/models)
    - `GEMINI_EMBED_MODEL=gemini-embedding-001`
    - `STORAGE_DIR=/tmp/storage` (Render Free has no persistent disk; this avoids permission issues)
 6. Deploy. When it’s live:

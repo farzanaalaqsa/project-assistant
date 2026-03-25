@@ -19,9 +19,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
 
     gemini_api_key: str | None = None
-    gemini_model: str = "gemini-1.5-flash"
-    # Gemini API embeddings (embedContent) expect e.g. `gemini-embedding-001`
-    # See: https://ai.google.dev/gemini-api/docs/embeddings
+    gemini_model: str = "gemini-2.5-flash"
     gemini_embed_model: str = "gemini-embedding-001"
 
     top_k: int = 6

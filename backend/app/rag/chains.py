@@ -65,7 +65,8 @@ async def answer_with_context(question: str, *, history: str, docs: list[Documen
         fallback = (
             f"LLM is unavailable (provider: `{provider}`). "
             f"Last error: {type(e).__name__}: {e}\n\n"
-            "Fix: on Render set `LLM_PROVIDER=gemini` and `GEMINI_API_KEY`, or use `LLM_PROVIDER=openai_compat`.\n\n"
+            "Fix: on Render set `LLM_PROVIDER=gemini`, `GEMINI_API_KEY`, and `GEMINI_MODEL` "
+            "(e.g. `gemini-2.5-flash`), or use `LLM_PROVIDER=openai_compat`.\n\n"
             "I can’t generate a full answer, but here are the most relevant excerpts with citations:\n\n"
             + "\n".join(excerpts[:8])
         )
