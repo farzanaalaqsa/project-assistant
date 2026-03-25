@@ -122,7 +122,7 @@ This repo is set up so **one container** serves:
    - `LOG_LEVEL=INFO`
    - `CORS_ORIGINS=https://project-assistant-lk5w.onrender.com`
    - `LLM_PROVIDER=gemini`
-   - `GEMINI_API_KEY=AIzaSyDvzzEYgZhbtsYJMlKPdeqlLyIhIg80d7o`
+   - `GEMINI_API_KEY=<>`
    - `GEMINI_MODEL=gemini-1.5-flash` (or your preferred model)
 6. Deploy. When it’s live:
    - UI: `https://<your-render-service>.onrender.com/`
