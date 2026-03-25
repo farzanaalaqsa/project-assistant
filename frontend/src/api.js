@@ -12,7 +12,15 @@ export async function uploadFiles({ files, sessionId }) {
   const url = new URL(`${API_BASE}/api/upload`, window.location.origin)
   if (sessionId) url.searchParams.set('session_id', sessionId)
   const res = await fetch(url.toString(), { method: 'POST', body: fd })
-  if (!res.ok) throw new Error(await res.text())
+  if (!res.ok) {
+    let text = await res.text()
+    try {
+      const data = JSON.parse(text)
+      throw new Error(data.detail || text)
+    } catch {
+      throw new Error(text || `upload failed: ${res.status}`)
+    }
+  }
   return res.json()
 }
 
@@ -22,7 +30,15 @@ export async function chat({ message, sessionId }) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message, session_id: sessionId }),
   })
-  if (!res.ok) throw new Error(await res.text())
+  if (!res.ok) {
+    let text = await res.text()
+    try {
+      const data = JSON.parse(text)
+      throw new Error(data.detail || text)
+    } catch {
+      throw new Error(text || `chat failed: ${res.status}`)
+    }
+  }
   return res.json()
 }
 

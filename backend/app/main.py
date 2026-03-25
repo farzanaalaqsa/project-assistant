@@ -8,9 +8,11 @@ from typing import Any
 
 from fastapi import FastAPI, File, UploadFile
 from fastapi import HTTPException
+from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.responses import JSONResponse
 
 from backend.app.agents.router import route_query
 from backend.app.agents.registry import AGENTS
@@ -62,13 +64,42 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    @app.middleware("http")
+    async def add_trace_id(request: Request, call_next):
+        trace_id = str(uuid.uuid4())
+        request.state.trace_id = trace_id
+        response = await call_next(request)
+        response.headers["x-trace-id"] = trace_id
+        return response
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception(request: Request, exc: Exception):
+        trace_id = getattr(request.state, "trace_id", None)
+        log_event(
+            logger,
+            LogEvent(
+                event="unhandled_exception",
+                trace_id=trace_id,
+                extra={"error_type": type(exc).__name__, "error": str(exc)},
+            ),
+            level=logging.ERROR,
+        )
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": "Internal Server Error",
+                "trace_id": trace_id,
+                "error_type": type(exc).__name__,
+            },
+        )
+
     @app.get("/api/health")
     async def health() -> dict[str, Any]:
         return {"ok": True, "env": settings.app_env}
 
     @app.post("/api/upload")
-    async def upload(files: list[UploadFile] = File(...), session_id: str | None = None) -> dict[str, Any]:
-        trace_id = str(uuid.uuid4())
+    async def upload(request: Request, files: list[UploadFile] = File(...), session_id: str | None = None) -> dict[str, Any]:
+        trace_id = getattr(request.state, "trace_id", None)
         sess = session_store.get_or_create(session_id)
         try:
             upload_dir = Path(settings.storage_dir) / "uploads" / sess.session_id
@@ -97,18 +128,19 @@ def create_app() -> FastAPI:
 
         for f in files:
             try:
-                dest = upload_dir / f.filename
+                safe_name = Path(f.filename).name
+                dest = upload_dir / safe_name
                 content = await f.read()
                 dest.write_bytes(content)
 
                 loaded = load_any(dest, sess.session_id)
                 upsert_documents(sess.session_id, loaded.documents)
-                ingested.append(f.filename)
+                ingested.append(safe_name)
                 total_docs += len(loaded.documents)
 
                 table_assets: list[TabularAsset] = []
                 for sheet, df in loaded.tables:
-                    table_assets.append(TabularAsset(filename=f.filename, sheet=sheet, df=df))
+                    table_assets.append(TabularAsset(filename=safe_name, sheet=sheet, df=df))
                 if table_assets:
                     tabular_store.add(sess.session_id, table_assets)
                     total_tables += len(table_assets)
