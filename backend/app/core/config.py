@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-1.5-flash"
-    gemini_embed_model: str = "text-embedding-004"
+    gemini_embed_model: str = "models/embedding-001"
 
     top_k: int = 6
     enable_rerank: bool = False

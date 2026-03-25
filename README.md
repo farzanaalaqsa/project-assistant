@@ -74,7 +74,7 @@ Copy `backend/.env.example` to `backend/.env` and adjust as needed.
   - set `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
 
 ### Embeddings
-- If `GEMINI_API_KEY` is set, the backend will use Gemini embeddings (`text-embedding-004`).
+- If `GEMINI_API_KEY` is set, the backend will use Gemini embeddings (default: `models/embedding-001`).
 - Else if `OPENAI_API_KEY` is set, the backend will use lightweight hosted embeddings (`text-embedding-3-small`).
 - Otherwise, install local embeddings with:
 
@@ -124,6 +124,7 @@ This repo is set up so **one container** serves:
    - `LLM_PROVIDER=gemini`
    - `GEMINI_API_KEY=<>`
    - `GEMINI_MODEL=gemini-1.5-flash` (or your preferred model)
+   - `GEMINI_EMBED_MODEL=models/embedding-001`
 6. Deploy. When it’s live:
    - UI: `https://<your-render-service>.onrender.com/`
    - API health: `https://<your-render-service>.onrender.com/api/health`
