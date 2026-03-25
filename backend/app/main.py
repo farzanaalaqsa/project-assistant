@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, UploadFile
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -67,33 +68,74 @@ def create_app() -> FastAPI:
 
     @app.post("/api/upload")
     async def upload(files: list[UploadFile] = File(...), session_id: str | None = None) -> dict[str, Any]:
+        trace_id = str(uuid.uuid4())
         sess = session_store.get_or_create(session_id)
-        upload_dir = Path(settings.storage_dir) / "uploads" / sess.session_id
-        upload_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            upload_dir = Path(settings.storage_dir) / "uploads" / sess.session_id
+            upload_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            log_event(
+                logger,
+                LogEvent(
+                    event="upload_storage_init_failed",
+                    trace_id=trace_id,
+                    session_id=sess.session_id,
+                    extra={"storage_dir": settings.storage_dir, "error": str(e)},
+                ),
+            )
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    "Failed to initialize upload storage. "
+                    "Set STORAGE_DIR to a writable path (e.g. /tmp/storage on Render Free)."
+                ),
+            ) from e
 
         ingested: list[str] = []
         total_docs = 0
         total_tables = 0
 
         for f in files:
-            dest = upload_dir / f.filename
-            content = await f.read()
-            dest.write_bytes(content)
+            try:
+                dest = upload_dir / f.filename
+                content = await f.read()
+                dest.write_bytes(content)
 
-            loaded = load_any(dest, sess.session_id)
-            upsert_documents(sess.session_id, loaded.documents)
-            ingested.append(f.filename)
-            total_docs += len(loaded.documents)
+                loaded = load_any(dest, sess.session_id)
+                upsert_documents(sess.session_id, loaded.documents)
+                ingested.append(f.filename)
+                total_docs += len(loaded.documents)
 
-            table_assets: list[TabularAsset] = []
-            for sheet, df in loaded.tables:
-                table_assets.append(TabularAsset(filename=f.filename, sheet=sheet, df=df))
-            if table_assets:
-                tabular_store.add(sess.session_id, table_assets)
-                total_tables += len(table_assets)
+                table_assets: list[TabularAsset] = []
+                for sheet, df in loaded.tables:
+                    table_assets.append(TabularAsset(filename=f.filename, sheet=sheet, df=df))
+                if table_assets:
+                    tabular_store.add(sess.session_id, table_assets)
+                    total_tables += len(table_assets)
+            except HTTPException:
+                raise
+            except Exception as e:
+                log_event(
+                    logger,
+                    LogEvent(
+                        event="upload_ingest_failed",
+                        trace_id=trace_id,
+                        session_id=sess.session_id,
+                        extra={"filename": f.filename, "error": str(e)},
+                    ),
+                )
+                raise HTTPException(
+                    status_code=500,
+                    detail=(
+                        f"Upload failed while processing `{f.filename}`. "
+                        f"Common fixes: set `GEMINI_API_KEY` (for embeddings + LLM), or set "
+                        f"`STORAGE_DIR=/tmp/storage` on Render Free. Error: {type(e).__name__}: {e}"
+                    ),
+                ) from e
 
         return {
             "session_id": sess.session_id,
+            "trace_id": trace_id,
             "ingested_files": ingested,
             "documents_indexed": total_docs,
             "tables_loaded": total_tables,
