@@ -6,7 +6,7 @@ Core features: **multi-agent RAG**, **hybrid retrieval**, **file upload (PDF/CSV
 
 ## Live demo
 - **App URL**: `https://project-assistant-lk5w.onrender.com`
-- **Screen recording (3–5 min)**: _TODO: add link_
+- **Screen recording (3–5 min)**: `https://drive.google.com/file/d/1aOrLMe5OuFAOrdnGXUqcsqpJCeKdKfWH/view?usp=sharing`
 
 ## Quickstart (local dev)
 
@@ -90,7 +90,7 @@ After generating sample data, run:
 
 ```bash
 pip install -r evaluation\requirements.txt
-python evaluation\run_ragas.py
+python -m evaluation.run_ragas
 ```
 
 This will write `evaluation/ragas_results.csv` and print a markdown table of scores. The query set is in `evaluation/queries.jsonl` (8 queries across easy/medium/hard/adversarial).

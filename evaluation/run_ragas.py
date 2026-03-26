@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pandas as pd
@@ -121,6 +123,29 @@ async def main() -> None:
     print(df.to_markdown(index=False))
 
 
+def run_main() -> None:
+    """
+    Avoid asyncio.run() here.
+
+    Some third-party libs (directly or indirectly) patch asyncio with nest_asyncio, which
+    currently breaks Python 3.14's asyncio.Runner cleanup (shutdown_default_executor).
+    We manage the loop + executor explicitly to keep CLI runs stable.
+    """
+
+    max_workers = min(32, (os.cpu_count() or 4) + 4)
+    executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="ragas-eval")
+    loop = asyncio.new_event_loop()
+    try:
+        asyncio.set_event_loop(loop)
+        loop.set_default_executor(executor)
+        loop.run_until_complete(main())
+        loop.run_until_complete(loop.shutdown_asyncgens())
+    finally:
+        executor.shutdown(wait=True, cancel_futures=True)
+        asyncio.set_event_loop(None)
+        loop.close()
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    run_main()
 
